@@ -1,0 +1,151 @@
+---
+title: "Backtesting"
+author: "Madhu"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+--- 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE,message=FALSE, include=FALSE}
+
+library(dplyr)
+library(data.table)
+library(DT)
+library(PerformanceAnalytics)
+clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "EBERTY-ZENTRAL","Central" )
+source("tasks_driv_1day.R")
+source("format_orders_final.R")
+source("smalls/format_orders_final_bt.R")
+source("smalls/utilrate_format_driv_berlin_smalls.R")
+source("smalls/utilrate_format_driv_london_smalls.R")
+source("smalls/utilrate_format_driv_paris_smalls.R")
+
+# wh_day<-as.Date("2016-08-31")
+# orders_alldays<-data.table()
+# drivers_alldays<-data.table()
+# real_asdvalues_alldays<-data.table()
+# pred_orders_alldays<-data.table()
+# asd_drivers_alldays<-data.table()
+# asd_values_alldays<-data.table()
+load("data_output/backtesting.dat")
+
+#N<-as.numeric(Sys.Date()-as.Date("2016-09-02"))
+N<-as.numeric(Sys.Date()-wh_day-2)
+if(N==0){
+  print("backtesting data up to date")
+  }else{
+for(i1 in c(1:N)){
+wh_day<-wh_day+1
+
+print(wh_day)
+a<-tasks_driv_1day(wh_day+2)
+
+orders_alldays<-rbind(orders_alldays,a[[1]], use.names=TRUE)
+drivers_alldays<-rbind(drivers_alldays,a[[2]], use.names=TRUE,fill=TRUE)
+real_asdvalues_alldays<-rbind(real_asdvalues_alldays,a[[3]], use.names=TRUE,fill=TRUE)
+  
+load(paste("/home/madhu/workspace/Demandprediction/workingversion/data_output/df_prediction_",wh_day,".dat",sep=""))
+
+
+
+if(wh_day>as.Date("2016-09-13")){
+  
+pred_orders_alldays<-rbind(pred_orders_alldays,format_predorders(df_prediction_all,test_dates)[1:2])
+
+asd_drivers<-inner_join(format_drivers_asd_utilrate_lon(df_prediction_all,test_dates,df_test,clust_names),format_drivers_asd_utilrate_ber(df_prediction_all,test_dates,df_test,clust_names),by="Date")
+asd_drivers<-inner_join(asd_drivers,format_drivers_asd_utilrate_par(df_prediction_all,test_dates,df_test,clust_names),by="Date")
+
+asd_values<-format_asd_values(df_prediction_all,test_dates,df_test,clust_names)
+
+
+}else{ 
+  
+if(wh_day<as.Date("2016-09-08")){
+df_prediction_all$Central<-NA
+df_test$Central<-NA
+}
+
+pred_orders_alldays<-rbind(pred_orders_alldays,format_realorders(df_prediction_all,test_dates)[1:2])
+
+asd_drivers<-inner_join(format_drivers_asd_utilrate_lon_bt(df_prediction_all,test_dates,df_test,clust_names),format_drivers_asd_utilrate_ber_bt(df_prediction_all,test_dates,df_test,clust_names),by="Date")
+asd_drivers<-inner_join(asd_drivers,format_drivers_asd_utilrate_par_bt(df_prediction_all,test_dates,df_test,clust_names),by="Date")
+
+asd_values<-format_asd_values_bt(df_prediction_all,test_dates,df_test,clust_names)
+
+}
+
+asd_drivers_alldays<-rbind(asd_drivers_alldays,asd_drivers[1:2,], use.names=TRUE,fill=TRUE)
+asd_values_alldays<-rbind(asd_values_alldays,asd_values[1:2,], use.names=TRUE,fill=TRUE)
+
+}
+}
+
+save(orders_alldays,drivers_alldays,real_asdvalues_alldays,pred_orders_alldays,asd_drivers_alldays,asd_values_alldays,wh_day,file="data_output/backtesting.dat")
+
+compare_orders<-inner_join(orders_alldays,pred_orders_alldays,by="Date",suffix = c(".real", ".pred"))
+compare_orders <- compare_orders[, c(1,matrix(2:ncol(compare_orders), nrow = 2, byrow = T))]
+diff_pred<-abs(compare_orders[seq(2,ncol(compare_orders),by=2)]-compare_orders[seq(3,ncol(compare_orders),by=2)])
+diff_pred<-diff_pred/compare_orders[seq(2,ncol(compare_orders),by=2)]
+diff_pred<-data.frame(lapply(diff_pred,function(x){ifelse(is.infinite(x),0,x)}))
+names(diff_pred)<-clust_names[!(clust_names %in% "Central")]
+perc_medianerror_orders<-rbind(apply(diff_pred[seq(1,nrow(diff_pred),2),],2,median,na.rm=TRUE),apply(diff_pred[seq(2,nrow(diff_pred),2),],2,median,na.rm=TRUE))
+perc_medianerror_orders<-cbind( perc_medianerror_orders,all=rowMeans(perc_medianerror_orders))
+perc_meanerror_orders<-rbind(apply(diff_pred[seq(1,nrow(diff_pred),2),],2,mean,na.rm=TRUE),apply(diff_pred[seq(2,nrow(diff_pred),2),],2,mean,na.rm=TRUE))
+perc_meanerror_orders<-cbind( perc_meanerror_orders,all=rowMeans(perc_meanerror_orders))
+perc_stderror_orders<-rbind(apply(diff_pred[seq(1,nrow(diff_pred),2),],2,sd,na.rm=TRUE),apply(diff_pred[seq(2,nrow(diff_pred),2),],2,sd,na.rm=TRUE))
+
+```
+
+## Comparision of predicted interactions,drivers and utilisation rates with real values {.tabset}
+
+### Interactions 
+
+#### Median Error
+```{r echo=FALSE,message=FALSE}
+datatable(perc_medianerror_orders,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatPercentage(c(1:ncol(perc_medianerror_orders)),2)
+
+```
+
+#### Mean Error
+```{r echo=FALSE,message=FALSE}
+datatable(perc_meanerror_orders,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatPercentage(c(1:ncol(perc_meanerror_orders)),2)
+
+```
+
+#### Standard Deviation of error
+```{r echo=FALSE,message=FALSE}
+datatable(perc_stderror_orders,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatPercentage(c(1:ncol(perc_stderror_orders)),2)
+``` 
+
+#### Comparison
+
+```{r echo=FALSE,message=FALSE}
+datatable(compare_orders,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatRound(c(2:ncol(compare_orders)), 2)
+```
+
+### Drivers
+```{r echo=FALSE,message=FALSE}
+compare_drivers<-data.table(inner_join(drivers_alldays,asd_drivers_alldays,by="Date",suffix = c(".real", ".pred")))
+col_names<-c("Date","Camden.real","Camden.pred","City.real","City.pred", "City_smallshifts", "North East.real","North East.pred",  "Soho.real","Soho.pred", "Soho_smallshifts", "South.real", "South.pred","Southeast.real", "Southeast.pred","Victoria.real","Victoria.pred", "Victoria_smallshifts", "West (new).real", "West (new).pred","util_perc.LON","West.real", "West.pred","EBERTY-ZENTRAL.real","EBERTY-ZENTRAL.pred","EBERTY-ZENTRAL_smallshifts","util_perc.BER")
+compare_drivers<-compare_drivers[,.SD,.SDcols=(intersect(col_names, colnames(compare_drivers)))]
+datatable(compare_drivers,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatRound(c(2:ncol(compare_drivers)), 2)
+```
+
+### Utlisation rates
+```{r echo=FALSE,message=FALSE}
+asd_values_alldays$City<-asd_values_alldays$City+asd_values_alldays$City_smallshifts
+asd_values_alldays$Soho<-asd_values_alldays$Soho+asd_values_alldays$Soho_smallshifts
+asd_values_alldays$Victoria<-asd_values_alldays$Victoria+asd_values_alldays$Victoria_smallshifts
+asd_values_alldays$`EBERTY-ZENTRAL`<-asd_values_alldays$`EBERTY-ZENTRAL`+asd_values_alldays$`EBERTY-ZENTRAL_smallshifts`
+colstodel<-c("City_smallshifts","Soho_smallshifts","Victoria_smallshifts","EBERTY-ZENTRAL_smallshifts")
+asd_values_alldays[, (colstodel):=NULL]
+
+compare_asd<-inner_join(real_asdvalues_alldays,asd_values_alldays,by="Date",suffix = c(".real", ".pred"))
+compare_asd<-compare_asd[, c(1,matrix(2:ncol(compare_asd), nrow = 2, byrow = T))]
+datatable(compare_asd,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatRound(c(2:ncol(compare_asd)), 2)
+
+
+```

@@ -1,0 +1,33 @@
+---
+title: "Driver Adjustments"
+author: "Madhu"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r echo=FALSE,message=FALSE,,warning=FALSE,include=FALSE}
+library(dplyr)
+library(DT)
+clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "EBERTY-ZENTRAL","Central" )
+load(paste("df_prediction_",Sys.Date(),".dat",sep=""))
+source("smalls/format_orders_final.R")
+source("smalls/utilrate_format_driv_london_smalls.R")
+
+ asd_drivers_all<-format_drivers_asd_utilrate_lon(df_prediction_all,test_dates,df_test,clust_names)
+ driver_nos<-driver_nos[,.SD,.SDcols=(intersect(names(asd_drivers_all), names(driver_nos)))]
+ driver_nos[is.na(driver_nos)] <- 0
+```
+
+
+
+### Total Drivers recommended for days  `r test_dates[2]` and `r test_dates[3]`
+
+```{r echo=FALSE,message=FALSE,,warning=FALSE}
+datatable(asd_drivers_all[c(1:2),],options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatRound(c(2:ncol(asd_drivers_all)), 2)
+```

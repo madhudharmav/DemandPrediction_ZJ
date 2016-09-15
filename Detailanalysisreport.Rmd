@@ -1,0 +1,194 @@
+---
+title: "Driver Allotment"
+author: "Madhu"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---  
+<br>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Analysis to allot number of drivers to a shift - Morning(MS) or Evening(ES) - 48 hours ahead  
+<br>
+
+
+
+
+```{r  echo=FALSE,message=FALSE,include=FALSE}
+
+library(data.table)
+library(magrittr)
+library(DT)
+library(knitr)
+clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "EBERTY-ZENTRAL","Central" )
+#source("Demand_Prediction_V3p2_child_final.R")
+load(paste("df_prediction_",Sys.Date(),".dat",sep="")) 
+source("format_orders_final.R")
+source("smalls/utilrate_format_driv_berlin_smalls.R")
+source("smalls/utilrate_format_driv_london_smalls.R")
+source("smalls/utilrate_format_driv_paris_smalls.R")
+  table_1<-format_predorders(df_prediction_all,test_dates)
+  table_2<-format_realorders(df_test,test_dates)
+  table_1<-table_1[,.SD,.SDcols=intersect(names(table_2),names(table_1))]
+  table_2d<-table_2[,c(2:ncol(table_2)),with=F]
+  table_3d<-table_1[,c(2:ncol(table_1)),with=F]-table_2[,c(2:ncol(table_1)),with=F]
+  table_3<-cbind(Date=table_2[,Date],table_3d)
+  table_4<-data.frame(t(c(17,15,17,17,21,18,17,18,18.4,15.8,14.5,17)))
+  names(table_4)<-c("West (new)","Victoria","South","Soho","North East","Camden","City","Southeast","West","Zentral","Nord Westen","Central")
+  table_4["EBERTY-ZENTRAL"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
+  table_4<-data.table(table_4[rep(nrow(table_4), each=4),])
+  table_4<-table_4[,.SD,.SDcols=(intersect(names(table_3d), names(table_4)))]
+  table_5<-cbind(Date=table_2[,Date],table_3d*table_4)
+  table_6<-cbind(Date=table_2[,Date],table_2d*table_4)
+  m1<-data.matrix(table_6[,c(2:ncol(table_6)),with=F])
+  m2<-data.matrix(table_5[,c(2:ncol(table_5)),with=F])
+  table_7d<-ifelse(is.na(m1), ifelse(is.na(m2), NA, m2), ifelse(is.na(m2), m1, m1 + m2))
+  table_7<-data.table(Date=table_3[,Date],table_7d)
+  table_9<-read.csv2("avg_shft_dur.csv",header = TRUE,sep="")
+  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "EBERTY-ZENTRAL" )
+  rno_sel_avg_shft<-which(table_9$Wday==weekdays(test_dates[2]))[2]
+  rno_sel_avg_shft1<-seq(rno_sel_avg_shft,rno_sel_avg_shft+3,1)
+  rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]<-rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]%%14
+  table_9d<-table_9[rno_sel_avg_shft1,clust_names]
+  table_9<-data.table(Date=table_2[,Date],table_9d)
+  table_10d<-table_7[,c(2:ncol(table_7)),with=F]/table_9[,c(2:ncol(table_9)),with=F]
+  table_10d[abs(table_10d)==Inf]<-NA
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"Victoria")
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"Soho")
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"City")
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"EBERTY-ZENTRAL")
+  table_10<-cbind(Date=table_3[,Date],table_10d)
+  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "EBERTY-ZENTRAL","EBERTY-ZENTRAL_smallshifts","Central")
+  table_10<-table_10[,.SD,.SDcols=(intersect(drivcolnames, names(table_10)))]
+  table_10d<-table_10[,c(2:ncol(table_10)),with=FALSE]
+  table_12d_b<-utilrate_format_driv_berlin_smalls(table_10d)
+  table_12d_l<-utilrate_format_driv_london_smalls(table_10d)
+  table_12d_p<-utilrate_format_driv_paris_smalls(table_10d)
+  table_12d<-cbind(table_12d_l,table_12d_b,table_12d_p)
+  table_12<-cbind(Date=table_3[,Date],table_12d)        
+  table_12a<-table_12
+  table_12a$City<-table_12a$City+table_12$City_smallshifts
+  table_12a$Soho<-table_12a$Soho+table_12$Soho_smallshifts
+  table_12a$Victoria<-table_12a$Victoria+table_12$Victoria_smallshifts
+  table_12a$`EBERTY-ZENTRAL`<-table_12$`EBERTY-ZENTRAL`+table_12$`EBERTY-ZENTRAL_smallshifts`
+  table_12a$City_smallshifts<-NULL
+  table_12a$Soho_smallshifts<-NULL
+  table_12a$Victoria_smallshifts<-NULL
+  table_12a$`EBERTY-ZENTRAL_smallshifts`<-NULL
+  table_8<-driver_nos[,.SD,.SDcols=(intersect(names(table_12), names(driver_nos)))]
+  table_8[is.na(table_8)] <- 0
+  table_8$Date<-table_12$Date
+  table_13<-cbind("Date"=table_12a$Date,table_12a[,c(2:ncol(table_12a)),with=FALSE]-table_8[,c(2:ncol(table_8)),with=FALSE])
+
+```
+
+
+
+#### Adjustment to no. of drivers assigned for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE,comment=NA}
+
+
+datatable(table_13,options=list("paging"= F,"searching"=F,"autoWidth"= F))
+
+```
+<br>
+
+#### No. of drivers assigned for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE,comment=NA}
+
+
+datatable(table_8,options=list("paging"= F,"searching"=F,"autoWidth"= F))
+
+```
+<br>
+
+#### Drivers recommended for days after rounding with thresholds on utilization rate `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+```{r echo=FALSE,comment=NA}
+
+
+datatable(table_12,options=list("paging"= F,"searching"=F,"autoWidth"= F))
+
+```
+<br>
+
+
+
+#### Drivers needed  for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+```{r echo=FALSE,comment=NA}
+
+
+datatable(table_10,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatRound(drivcolnames, 2)
+
+```
+<br>
+
+
+#### Average shift Duration `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE,comment=NA}
+
+
+datatable(table_9,options=list("paging"= F,"searching"=F,"autoWidth"= F))
+
+```
+<br>
+
+
+#### Total estimated time for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE}
+datatable(table_7,style="default",options=list("paging"= F,"searching"=F))%>%formatRound(clust_names, 2)
+
+```
+<br>
+
+
+#### Travelling time(+interaction) estimates for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE}
+
+
+datatable(table_6,style="default",options=list("paging"= F,"searching"=F))%>%formatRound(clust_names, 2)
+
+```
+<br>
+
+
+#### Time needed for expected tasks on `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE}
+datatable(table_5,style="default",options=list("paging"= F,"searching"=F))%>%formatRound(clust_names, 2)
+
+```
+<br>
+
+
+#### Expected tasks in the next 48 hours for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE}
+datatable(table_3,style="default",options=list("paging"= F,"searching"=F))%>%formatRound(clust_names, 2)
+
+```
+<br>
+
+
+#### Current tasks for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r echo=FALSE}
+datatable(table_2,style="default",options=list("paging"= F,"searching"=F))%>%formatRound(clust_names, 2)
+
+```
+<br>
+
+
+#### Total expected tasks for days `r test_dates[2]` and `r test_dates[3]` and `r test_dates[4]`
+
+```{r  echo=FALSE}
+datatable(table_1,style="default",options=list("paging"= F,"searching"=F))%>%formatRound(clust_names, 2)
+
+```
+
