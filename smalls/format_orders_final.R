@@ -22,6 +22,10 @@ addsmallshift<-function(table_7,table_9,table_10d,cluster){
   clusterss<-paste0(cluster,"_smallshifts")
   sl_lu<-rbind(c(0,1,1,1,1,2,2,2,3,3,3),c(0,0,1,2,3,2,3,4,3,4,5))
   for (i1 in c(1:4)){
+    if(cluster=="EBERTY-ZENTRAL" & (i1==1 | i1==3)){
+      table_10d[i1,c(clusterss) := 0]
+      next
+    }
     if(unlist(table_9[i1,cluster,with=FALSE])!=0){
       a<-findInterval(table_7[i1,cluster,with=FALSE],unlist(table_9[i1,cluster,with=FALSE])*sl_lu[1,]+180*sl_lu[2,])
       longs_driv<-sl_lu[1,a]

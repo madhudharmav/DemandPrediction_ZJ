@@ -25,11 +25,13 @@ library(knitr)
 clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "EBERTY-ZENTRAL","Central" )
 #source("Demand_Prediction_V3p2_child_final.R")
 load(paste("df_prediction_",Sys.Date(),".dat",sep="")) 
-source("format_orders_final.R")
+#load("data_output/df_prediction_2016-09-12.dat")
+source("smalls/format_orders_final.R")
 source("smalls/utilrate_format_driv_berlin_smalls.R")
 source("smalls/utilrate_format_driv_london_smalls.R")
 source("smalls/utilrate_format_driv_paris_smalls.R")
-  table_1<-format_predorders(df_prediction_all,test_dates)
+ # table_1<-format_predorders(df_prediction_all,test_dates)
+  table_1<-format_realorders(df_prediction_all,test_dates) #if date <2016-09-13
   table_2<-format_realorders(df_test,test_dates)
   table_1<-table_1[,.SD,.SDcols=intersect(names(table_2),names(table_1))]
   table_2d<-table_2[,c(2:ncol(table_2)),with=F]
