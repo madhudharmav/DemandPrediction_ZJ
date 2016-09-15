@@ -67,7 +67,11 @@ a1<-a[strptime(From,format="%H:%M")<strptime("14:00",format="%H:%M")]
 daily_interactions_MS<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
 a1<-a[strptime(From,format="%H:%M")>=strptime("14:00",format="%H:%M")]
 daily_interactions_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
-
+#eberty corrections
+e_ms<-daily_interactions_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
+e_es<-daily_interactions_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
+daily_interactions_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
+daily_interactions_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=0]
 
 #regressors for training
 df_interactions_48hrsahead<-gen_48hrsahead_PUDO(date_s,date_e)
@@ -82,6 +86,10 @@ a1<-a[strptime(From,format="%H:%M")<strptime("14:00",format="%H:%M")]
 daily_interactions_48hrsahead_MS<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
 a1<-a[strptime(From,format="%H:%M")>=strptime("14:00",format="%H:%M")]
 daily_interactions_48hrsahead_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
+e_ms<-daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
+e_es<-daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
+daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
+daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=0]
 
 
 #forecasting days
@@ -102,6 +110,10 @@ a1<-a[strptime(From,format="%H:%M")<strptime("14:00",format="%H:%M")]
 daily_interactions_test_48hrsahead_MS<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
 a1<-a[strptime(From,format="%H:%M")>=strptime("14:00",format="%H:%M")]
 daily_interactions_test_48hrsahead_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
+e_ms<-daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
+e_es<-daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
+daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
+daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=0]
 
 #current tasks for forecast days
 df_test <- format_interaction_2(df_interactions_raw_test, c(head(test_dates, 1),tail(test_dates, 1)), daily = FALSE)
