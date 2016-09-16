@@ -71,7 +71,7 @@ daily_interactions_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff
 e_ms<-daily_interactions_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
 e_es<-daily_interactions_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
 daily_interactions_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
-daily_interactions_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=0]
+daily_interactions_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=NA]
 
 #regressors for training
 df_interactions_48hrsahead<-gen_48hrsahead_PUDO(date_s,date_e)
@@ -89,7 +89,7 @@ daily_interactions_48hrsahead_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDc
 e_ms<-daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
 e_es<-daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
 daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
-daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=0]
+daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=NA]
 
 
 #forecasting days
@@ -113,7 +113,7 @@ daily_interactions_test_48hrsahead_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) 
 e_ms<-daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
 e_es<-daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
 daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
-daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=0]
+daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=NA]
 
 #current tasks for forecast days
 df_test <- format_interaction_2(df_interactions_raw_test, c(head(test_dates, 1),tail(test_dates, 1)), daily = FALSE)
