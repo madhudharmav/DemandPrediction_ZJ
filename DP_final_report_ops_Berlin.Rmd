@@ -16,8 +16,8 @@ library(dplyr)
 library(DT)
 
 clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "EBERTY-ZENTRAL","Central" )
-#source("Demand_Prediction_V3p2_child_final.R")
-load(paste("df_prediction_",Sys.Date(),".dat",sep=""))
+source("Demand_Prediction_V3p2_child_final.R")
+#load(paste("df_prediction_",Sys.Date(),".dat",sep=""))
 source("smalls/format_orders_final.R")
 source("smalls/utilrate_format_driv_berlin_smalls.R")
  
