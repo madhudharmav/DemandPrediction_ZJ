@@ -17,7 +17,7 @@ library(DT)
 library(PerformanceAnalytics)
 clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "EBERTY-ZENTRAL","Central" )
 source("tasks_driv_1day.R")
-source("format_orders_final.R")
+source("smalls/format_orders_final.R")
 source("smalls/format_orders_final_bt.R")
 source("smalls/utilrate_format_driv_berlin_smalls.R")
 source("smalls/utilrate_format_driv_london_smalls.R")
@@ -134,7 +134,7 @@ compare_drivers<-compare_drivers[,.SD,.SDcols=(intersect(col_names, colnames(com
 datatable(compare_drivers,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatRound(c(2:ncol(compare_drivers)), 2)
 ```
 
-### Utlisation rates
+### Utilisation rates
 ```{r echo=FALSE,message=FALSE}
 asd_values_alldays$City<-asd_values_alldays$City+asd_values_alldays$City_smallshifts
 asd_values_alldays$Soho<-asd_values_alldays$Soho+asd_values_alldays$Soho_smallshifts
