@@ -35,4 +35,4 @@ knitr::opts_chunk$set(echo = TRUE)
 
 6. Note down the total drivers already allotted from the backend
 
-7. Adjust(add or remove) the number of drivers for the alooted shifts and days
+7. Adjust(add or remove) the number of drivers for the allotted shifts and days
