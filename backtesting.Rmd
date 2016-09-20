@@ -15,7 +15,7 @@ library(dplyr)
 library(data.table)
 library(DT)
 library(PerformanceAnalytics)
-clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "EBERTY-ZENTRAL","Central" )
+clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "Zentrallager","Central" )
 source("tasks_driv_1day.R")
 source("smalls/format_orders_final.R")
 source("smalls/format_orders_final_bt.R")
@@ -129,7 +129,7 @@ datatable(compare_orders,options=list("paging"= F,"searching"=F,"autoWidth"= F))
 ### Drivers
 ```{r echo=FALSE,message=FALSE}
 compare_drivers<-data.table(inner_join(drivers_alldays,asd_drivers_alldays,by="Date",suffix = c(".real", ".pred")))
-col_names<-c("Date","Camden.real","Camden.pred","City.real","City.pred", "City_smallshifts", "North East.real","North East.pred",  "Soho.real","Soho.pred", "Soho_smallshifts", "South.real", "South.pred","Southeast.real", "Southeast.pred","Victoria.real","Victoria.pred", "Victoria_smallshifts", "West (new).real", "West (new).pred","util_perc.LON","West.real", "West.pred","EBERTY-ZENTRAL.real","EBERTY-ZENTRAL.pred","EBERTY-ZENTRAL_smallshifts","util_perc.BER")
+col_names<-c("Date","Camden.real","Camden.pred","City.real","City.pred", "City_smallshifts", "North East.real","North East.pred",  "Soho.real","Soho.pred", "Soho_smallshifts", "South.real", "South.pred","Southeast.real", "Southeast.pred","Victoria.real","Victoria.pred", "Victoria_smallshifts", "West (new).real", "West (new).pred","util_perc.LON","West.real", "West.pred","Zentrallager.real","Zentrallager.pred","Zentrallager_smallshifts","util_perc.BER")
 compare_drivers<-compare_drivers[,.SD,.SDcols=(intersect(col_names, colnames(compare_drivers)))]
 datatable(compare_drivers,options=list("paging"= F,"searching"=F,"autoWidth"= F))%>%formatRound(c(2:ncol(compare_drivers)), 2)
 ```
@@ -139,8 +139,8 @@ datatable(compare_drivers,options=list("paging"= F,"searching"=F,"autoWidth"= F)
 asd_values_alldays$City<-asd_values_alldays$City+asd_values_alldays$City_smallshifts
 asd_values_alldays$Soho<-asd_values_alldays$Soho+asd_values_alldays$Soho_smallshifts
 asd_values_alldays$Victoria<-asd_values_alldays$Victoria+asd_values_alldays$Victoria_smallshifts
-asd_values_alldays$`EBERTY-ZENTRAL`<-asd_values_alldays$`EBERTY-ZENTRAL`+asd_values_alldays$`EBERTY-ZENTRAL_smallshifts`
-colstodel<-c("City_smallshifts","Soho_smallshifts","Victoria_smallshifts","EBERTY-ZENTRAL_smallshifts")
+asd_values_alldays$Zentrallager<-asd_values_alldays$Zentrallager+asd_values_alldays$Zentrallager_smallshifts
+colstodel<-c("City_smallshifts","Soho_smallshifts","Victoria_smallshifts","Zentrallager_smallshifts")
 asd_values_alldays[, (colstodel):=NULL]
 
 compare_asd<-inner_join(real_asdvalues_alldays,asd_values_alldays,by="Date",suffix = c(".real", ".pred"))

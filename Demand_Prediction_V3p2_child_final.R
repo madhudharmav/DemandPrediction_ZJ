@@ -38,8 +38,8 @@ set.seed(1)
 
 # load functions
 source("Demand_format.R")
-source("Demand_models_hourly.R")
-source("Demand_conv2drivers.R")
+#source("Demand_models_hourly.R")
+#source("Demand_conv2drivers.R")
 source("make_idletimepivot.R")
 source("predictions_cluster_V3p2_diff_noit.R")
 source("getcreateddatebyref.R")
@@ -59,8 +59,9 @@ date_e<-strptime(dates[2]+1,format="%Y-%m-%d",tz="UTC")
 df_interactions_raw<-gen_data_distr_PUDO(date_s,date_e)
 df_interactions_raw$timeslotfromasstringhours_localtime<-format(as.POSIXct(df_interactions_raw$timeslotfromasstringhours_localtime,format="%H:%M")+hours(1),format="%H:%M")
 df_interactions_raw$timeslottoasstringhours_localtime<-format(as.POSIXct(df_interactions_raw$timeslottoasstringhours_localtime,format="%H:%M")+hours(1),format="%H:%M")
-df_interactions_raw[df_interactions_raw$cluster=="Nord Westen","cluster"]<-"EBERTY-ZENTRAL"
-df_interactions_raw[df_interactions_raw$cluster=="Zentral","cluster"]<-"EBERTY-ZENTRAL"
+df_interactions_raw[df_interactions_raw$cluster=="Nord Westen","cluster"]<-"Zentrallager"
+df_interactions_raw[df_interactions_raw$cluster=="Zentral","cluster"]<-"Zentrallager"
+df_interactions_raw[df_interactions_raw$cluster=="EBERTY-ZENTRAL","cluster"]<-"Zentrallager"
 hourly_interactions <- format_interaction_2(df_interactions_raw, dates, daily = FALSE)
 a<-data.table(hourly_interactions)
 a1<-a[strptime(From,format="%H:%M")<strptime("14:00",format="%H:%M")]
@@ -68,28 +69,29 @@ daily_interactions_MS<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff
 a1<-a[strptime(From,format="%H:%M")>=strptime("14:00",format="%H:%M")]
 daily_interactions_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
 #eberty corrections
-e_ms<-daily_interactions_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
-e_es<-daily_interactions_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
-daily_interactions_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
-daily_interactions_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=NA]
+e_ms<-daily_interactions_MS[weekdays(Date)=="Saturday",Zentrallager]
+e_es<-daily_interactions_ES[weekdays(Date)=="Saturday",Zentrallager]
+daily_interactions_MS[weekdays(Date)=="Saturday",Zentrallager:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
+daily_interactions_ES[weekdays(Date)=="Saturday",Zentrallager:=NA]
 
 #regressors for training
 df_interactions_48hrsahead<-gen_48hrsahead_PUDO(date_s,date_e)
 df_interactions_48hrsahead<-df_interactions_48hrsahead[names(df_interactions_raw)]
 df_interactions_48hrsahead$timeslotfromasstringhours_localtime<-format(as.POSIXct(df_interactions_48hrsahead$timeslotfromasstringhours_localtime,format="%H:%M")+hours(1),format="%H:%M")
 df_interactions_48hrsahead$timeslottoasstringhours_localtime<-format(as.POSIXct(df_interactions_48hrsahead$timeslottoasstringhours_localtime,format="%H:%M")+hours(1),format="%H:%M")
-df_interactions_48hrsahead[df_interactions_48hrsahead$cluster=="Nord Westen","cluster"]<-"EBERTY-ZENTRAL"
-df_interactions_48hrsahead[df_interactions_48hrsahead$cluster=="Zentral","cluster"]<-"EBERTY-ZENTRAL"
+df_interactions_48hrsahead[df_interactions_48hrsahead$cluster=="Nord Westen","cluster"]<-"Zentrallager"
+df_interactions_48hrsahead[df_interactions_48hrsahead$cluster=="Zentral","cluster"]<-"Zentrallager"
+df_interactions_48hrsahead[df_interactions_48hrsahead$cluster=="EBERTY-ZENTRAL","cluster"]<-"Zentrallager"
 hourly_interactions_48hrsahead <- format_interaction_2(df_interactions_48hrsahead, dates, daily = FALSE)
 a<-data.table(hourly_interactions_48hrsahead)
 a1<-a[strptime(From,format="%H:%M")<strptime("14:00",format="%H:%M")]
 daily_interactions_48hrsahead_MS<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
 a1<-a[strptime(From,format="%H:%M")>=strptime("14:00",format="%H:%M")]
 daily_interactions_48hrsahead_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
-e_ms<-daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
-e_es<-daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
-daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
-daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=NA]
+e_ms<-daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",Zentrallager]
+e_es<-daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",Zentrallager]
+daily_interactions_48hrsahead_MS[weekdays(Date)=="Saturday",Zentrallager:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
+daily_interactions_48hrsahead_ES[weekdays(Date)=="Saturday",Zentrallager:=NA]
 
 
 #forecasting days
@@ -102,18 +104,19 @@ df_interactions_raw_test<-gen_48hrsahead_PUDO(date_s_test,date_e_test)
 df_interactions_raw_test<-df_interactions_raw_test[names(df_interactions_raw)]
 df_interactions_raw_test$timeslotfromasstringhours_localtime<-format(as.POSIXct(df_interactions_raw_test$timeslotfromasstringhours_localtime,format="%H:%M")+hours(1),format="%H:%M")
 df_interactions_raw_test$timeslottoasstringhours_localtime<-format(as.POSIXct(df_interactions_raw_test$timeslottoasstringhours_localtime,format="%H:%M")+hours(1),format="%H:%M")
-df_interactions_raw_test[df_interactions_raw_test$cluster=="Nord Westen","cluster"]<-"EBERTY-ZENTRAL"
-df_interactions_raw_test[df_interactions_raw_test$cluster=="Zentral","cluster"]<-"EBERTY-ZENTRAL"
+df_interactions_raw_test[df_interactions_raw_test$cluster=="Nord Westen","cluster"]<-"Zentrallager"
+df_interactions_raw_test[df_interactions_raw_test$cluster=="Zentral","cluster"]<-"Zentrallager"
+df_interactions_raw_test[df_interactions_raw_test$cluster=="EBERTY-ZENTRAL","cluster"]<-"Zentrallager"
 hourly_interactions_raw_test <- format_interaction_2(df_interactions_raw_test, c(head(test_dates, 1),tail(test_dates, 1)), daily = FALSE)
 a<-data.table(hourly_interactions_raw_test)
 a1<-a[strptime(From,format="%H:%M")<strptime("14:00",format="%H:%M")]
 daily_interactions_test_48hrsahead_MS<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
 a1<-a[strptime(From,format="%H:%M")>=strptime("14:00",format="%H:%M")]
 daily_interactions_test_48hrsahead_ES<-setkey(a1,Date)[,lapply(.SD,sum,na.rm=T) ,.SDcols=setdiff(names(a1),c("Date","From")),by="Date"][CJ(unique(a$Date)),allow.cartesian=TRUE]
-e_ms<-daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
-e_es<-daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`]
-daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
-daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",`EBERTY-ZENTRAL`:=NA]
+e_ms<-daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",Zentrallager]
+e_es<-daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",Zentrallager]
+daily_interactions_test_48hrsahead_MS[weekdays(Date)=="Saturday",Zentrallager:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
+daily_interactions_test_48hrsahead_ES[weekdays(Date)=="Saturday",Zentrallager:=NA]
 
 #current tasks for forecast days
 df_test <- format_interaction_2(df_interactions_raw_test, c(head(test_dates, 1),tail(test_dates, 1)), daily = FALSE)
@@ -125,14 +128,14 @@ df_test <- one2two_hour_bins(df_test)
 # daily model 
 # available: "stl", "HoltWinters", "ets", "stlm", "Arima",  "Arimax", "tbats"
 
-clusters_all<-c("Victoria" , "Camden" ,"City" , "North East" , "Soho" ,"South" ,"Southeast" , "West",  "West (new)",  "EBERTY-ZENTRAL","Central" )  
+clusters_all<-c("Victoria" , "Camden" ,"City" , "North East" , "Soho" ,"South" ,"Southeast" , "West",  "West (new)",  "Zentrallager","Central" )  
 #df_drivers_all<-NULL
 #df_prediction_all<-NULL
 df_prediction_all<-data.frame(row.names=1:14)
 
 for (district in clusters_all){
   print(district)
-  if(district %in% c("EBERTY-ZENTRAL" ,  "West")){
+  if(district %in% c("Zentrallager" ,  "West")){
     city<-"Berlin"
   } else if(district %in% c("Central")){
     city<-"Paris"
@@ -153,8 +156,9 @@ names(df_prediction_all)<-c("Date",clusters_all)
 
 #------------------------------Calculating drivers allotted for forecast days ------------------------------------
 idle_time_raw_test<-gen_data_idletime(date_s_test,date_e_test)
-idle_time_raw_test[idle_time_raw_test$fleet__name=="Nord Westen","fleet__name"]<-"EBERTY-ZENTRAL"
-idle_time_raw_test[idle_time_raw_test$fleet__name=="Zentral","fleet__name"]<-"EBERTY-ZENTRAL"
+idle_time_raw_test[idle_time_raw_test$fleet__name=="Nord Westen","fleet__name"]<-"Zentrallager"
+idle_time_raw_test[idle_time_raw_test$fleet__name=="Zentral","fleet__name"]<-"Zentrallager"
+idle_time_raw_test[idle_time_raw_test$fleet__name=="EBERTY-ZENTRAL","fleet__name"]<-"Zentrallager"
 driver_nos_data<-data.table(idle_time_raw_test[,c("courier__name","fleet__name","Days.in.forecast__startAt__date","destination_from_hours")])
 driver_nos_data<-driver_nos_data[as.POSIXct(paste(Days.in.forecast__startAt__date,destination_from_hours,sep=" "), format="%m/%d/%y %H:%M")<as.POSIXct(paste(today+4,"14:00"))]
 driver_nos_data<-driver_nos_data[as.POSIXct(paste(Days.in.forecast__startAt__date,destination_from_hours,sep=" "), format="%m/%d/%y %H:%M")>=as.POSIXct(paste(today+2,"14:00"))]

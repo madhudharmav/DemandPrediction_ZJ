@@ -30,7 +30,7 @@ format_drivers_asd_utilrate_lon_bt<-function(df_prediction_all,test_dates,df_tes
   table_3<-cbind(Date=table_2[,Date],table_3d)
   table_4<-data.frame(t(c(17,15,17,17,21,18,17,18,18.4,15.8,14.5,17)))
   names(table_4)<-c("West (new)","Victoria","South","Soho","North East","Camden","City","Southeast","West","Zentral","Nord Westen","Central")
-  table_4["EBERTY-ZENTRAL"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
+  table_4["Zentrallager"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
   table_4<-data.table(table_4[rep(nrow(table_4), each=4),])
   table_4<-table_4[,.SD,.SDcols=(intersect(names(table_3d), names(table_4)))]
   table_5<-cbind(Date=table_2[,Date],table_3d*table_4)
@@ -40,7 +40,7 @@ format_drivers_asd_utilrate_lon_bt<-function(df_prediction_all,test_dates,df_tes
   table_7d<-ifelse(is.na(m1), ifelse(is.na(m2), NA, m2), ifelse(is.na(m2), m1, m1 + m2))
   table_7<-data.table(Date=table_3[,Date],table_7d)
   table_9<-read.csv2("avg_shft_dur.csv",header = TRUE,sep="")
-  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "EBERTY-ZENTRAL" )
+  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "Zentrallager" )
   rno_sel_avg_shft<-which(table_9$Wday==weekdays(test_dates[2]))[2]
   rno_sel_avg_shft1<-seq(rno_sel_avg_shft,rno_sel_avg_shft+3,1)
   rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]<-rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]%%14
@@ -51,9 +51,9 @@ format_drivers_asd_utilrate_lon_bt<-function(df_prediction_all,test_dates,df_tes
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Victoria")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Soho")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"City")
-  table_10d<-addsmallshift(table_7,table_9,table_10d,"EBERTY-ZENTRAL")
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"Zentrallager")
   table_10<-cbind(Date=table_3[,Date],table_10d)
-  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "EBERTY-ZENTRAL","EBERTY-ZENTRAL_smallshifts","Central")
+  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "Zentrallager","Zentrallager_smallshifts","Central")
   table_10<-table_10[,.SD,.SDcols=(intersect(drivcolnames, names(table_10)))]
   table_10d<-table_10[,c(2:ncol(table_10)),with=FALSE]
   table_12d<-utilrate_format_driv_london_smalls(table_10d)
@@ -73,7 +73,7 @@ format_drivers_asd_utilrate_ber_bt<-function(df_prediction_all,test_dates,df_tes
   table_3<-cbind(Date=table_2[,Date],table_3d)
   table_4<-data.frame(t(c(17,15,17,17,21,18,17,18,18.4,15.8,14.5,17)))
   names(table_4)<-c("West (new)","Victoria","South","Soho","North East","Camden","City","Southeast","West","Zentral","Nord Westen","Central")
-  table_4["EBERTY-ZENTRAL"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
+  table_4["Zentrallager"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
   table_4<-data.table(table_4[rep(nrow(table_4), each=4),])
   table_4<-table_4[,.SD,.SDcols=(intersect(names(table_3d), names(table_4)))]
   table_5<-cbind(Date=table_2[,Date],table_3d*table_4)
@@ -83,7 +83,7 @@ format_drivers_asd_utilrate_ber_bt<-function(df_prediction_all,test_dates,df_tes
   table_7d<-ifelse(is.na(m1), ifelse(is.na(m2), NA, m2), ifelse(is.na(m2), m1, m1 + m2))
   table_7<-data.table(Date=table_3[,Date],table_7d)
   table_9<-read.csv2("avg_shft_dur.csv",header = TRUE,sep="")
-  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "EBERTY-ZENTRAL" )
+  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "Zentrallager" )
   rno_sel_avg_shft<-which(table_9$Wday==weekdays(test_dates[2]))[2]
   rno_sel_avg_shft1<-seq(rno_sel_avg_shft,rno_sel_avg_shft+3,1)
   rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]<-rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]%%14
@@ -94,9 +94,9 @@ format_drivers_asd_utilrate_ber_bt<-function(df_prediction_all,test_dates,df_tes
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Victoria")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Soho")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"City")
-  table_10d<-addsmallshift(table_7,table_9,table_10d,"EBERTY-ZENTRAL")
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"Zentrallager")
   table_10<-cbind(Date=table_3[,Date],table_10d)
-  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "EBERTY-ZENTRAL","EBERTY-ZENTRAL_smallshifts","Central")
+  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "Zentrallager","Zentrallager_smallshifts","Central")
   table_10<-table_10[,.SD,.SDcols=(intersect(drivcolnames, names(table_10)))]
   table_10d<-table_10[,c(2:ncol(table_10)),with=FALSE]
   table_12d<-utilrate_format_driv_berlin_smalls(table_10d)
@@ -117,7 +117,7 @@ format_drivers_asd_utilrate_par_bt<-function(df_prediction_all,test_dates,df_tes
   table_3<-cbind(Date=table_2[,Date],table_3d)
   table_4<-data.frame(t(c(17,15,17,17,21,18,17,18,18.4,15.8,14.5,17)))
   names(table_4)<-c("West (new)","Victoria","South","Soho","North East","Camden","City","Southeast","West","Zentral","Nord Westen","Central")
-  table_4["EBERTY-ZENTRAL"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
+  table_4["Zentrallager"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
   table_4<-data.table(table_4[rep(nrow(table_4), each=4),])
   table_4<-table_4[,.SD,.SDcols=(intersect(names(table_3d), names(table_4)))]
   table_5<-cbind(Date=table_2[,Date],table_3d*table_4)
@@ -127,7 +127,7 @@ format_drivers_asd_utilrate_par_bt<-function(df_prediction_all,test_dates,df_tes
   table_7d<-ifelse(is.na(m1), ifelse(is.na(m2), NA, m2), ifelse(is.na(m2), m1, m1 + m2))
   table_7<-data.table(Date=table_3[,Date],table_7d)
   table_9<-read.csv2("avg_shft_dur.csv",header = TRUE,sep="")
-  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "EBERTY-ZENTRAL" )
+  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "Zentrallager" )
   rno_sel_avg_shft<-which(table_9$Wday==weekdays(test_dates[2]))[2]
   rno_sel_avg_shft1<-seq(rno_sel_avg_shft,rno_sel_avg_shft+3,1)
   rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]<-rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]%%14
@@ -138,9 +138,9 @@ format_drivers_asd_utilrate_par_bt<-function(df_prediction_all,test_dates,df_tes
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Victoria")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Soho")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"City")
-  table_10d<-addsmallshift(table_7,table_9,table_10d,"EBERTY-ZENTRAL")
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"Zentrallager")
   table_10<-cbind(Date=table_3[,Date],table_10d)
-  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "EBERTY-ZENTRAL","EBERTY-ZENTRAL_smallshifts","Central")
+  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "Zentrallager","Zentrallager_smallshifts","Central")
   table_10<-table_10[,.SD,.SDcols=(intersect(drivcolnames, names(table_10)))]
   table_10d<-table_10[,c(2:ncol(table_10)),with=FALSE]
   table_12d<-utilrate_format_driv_paris_smalls(table_10d)
@@ -162,7 +162,7 @@ format_asd_values_bt<-function(df_prediction_all,test_dates,df_test,clust_names)
   table_3<-cbind(Date=table_2[,Date],table_3d)
   table_4<-data.frame(t(c(17,15,17,17,21,18,17,18,18.4,15.8,14.5,17)))
   names(table_4)<-c("West (new)","Victoria","South","Soho","North East","Camden","City","Southeast","West","Zentral","Nord Westen","Central")
-  table_4["EBERTY-ZENTRAL"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
+  table_4["Zentrallager"]<-mean(unlist(c(table_4["Zentral"],table_4["Nord Westen"])))
   table_4<-data.table(table_4[rep(nrow(table_4), each=4),])
   table_4<-table_4[,.SD,.SDcols=(intersect(names(table_3d), names(table_4)))]
   table_5<-cbind(Date=table_2[,Date],table_3d*table_4)
@@ -172,7 +172,7 @@ format_asd_values_bt<-function(df_prediction_all,test_dates,df_test,clust_names)
   table_7d<-ifelse(is.na(m1), ifelse(is.na(m2), NA, m2), ifelse(is.na(m2), m1, m1 + m2))
   table_7<-data.table(Date=table_3[,Date],table_7d)
   table_9<-read.csv2("avg_shft_dur.csv",header = TRUE,sep="")
-  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "EBERTY-ZENTRAL" )
+  names(table_9)<-c("Wday","shift","Camden", "Central", "City", "North East", "Soho", "South", "Southeast", "Victoria", "West (new)", "West", "Zentrallager" )
   rno_sel_avg_shft<-which(table_9$Wday==weekdays(test_dates[2]))[2]
   rno_sel_avg_shft1<-seq(rno_sel_avg_shft,rno_sel_avg_shft+3,1)
   rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]<-rno_sel_avg_shft1[rno_sel_avg_shft1/14>1]%%14
@@ -183,9 +183,9 @@ format_asd_values_bt<-function(df_prediction_all,test_dates,df_test,clust_names)
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Victoria")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"Soho")
   table_10d<-addsmallshift(table_7,table_9,table_10d,"City")
-  table_10d<-addsmallshift(table_7,table_9,table_10d,"EBERTY-ZENTRAL")
+  table_10d<-addsmallshift(table_7,table_9,table_10d,"Zentrallager")
   table_10<-cbind(Date=table_3[,Date],table_10d)
-  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "EBERTY-ZENTRAL","EBERTY-ZENTRAL_smallshifts","Central")
+  drivcolnames<-c("Date","Camden", "City", "City_smallshifts", "North East", "Soho", "Soho_smallshifts", "South", "Southeast", "Victoria", "Victoria_smallshifts", "West (new)", "West", "Zentrallager","Zentrallager_smallshifts","Central")
   table_10<-table_10[,.SD,.SDcols=(intersect(drivcolnames, names(table_10)))]
   table_10d<-table_10[,c(2:ncol(table_10)),with=FALSE]
   table_12d<-utilrate_format_driv_london_smalls(table_10d)
