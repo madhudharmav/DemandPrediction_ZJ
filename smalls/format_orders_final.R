@@ -26,19 +26,35 @@ addsmallshift<-function(table_7,table_9,table_10d,cluster){
       table_10d[i1,c(clusterss) := 0]
       next
     }
-    if(unlist(table_9[i1,cluster,with=FALSE])!=0){
-      a<-findInterval(table_7[i1,cluster,with=FALSE],unlist(table_9[i1,cluster,with=FALSE])*sl_lu[1,]+220*sl_lu[2,])
-      longs_driv<-sl_lu[1,a]
-      smalls_driv<-sl_lu[2,a]
-      remtime<-table_7[i1,cluster,with=FALSE]-(unlist(table_9[i1,cluster,with=FALSE])*sl_lu[1,a]+220*sl_lu[2,a])
-      if(sl_lu[1,a]!=sl_lu[1,a+1]){
-        table_10d[i1,c(cluster) := unlist(remtime/unlist(table_9[i1,cluster,with=FALSE])+longs_driv)]
-        table_10d[i1,c(clusterss):=smalls_driv]
-      }else{
-        table_10d[i1,c(cluster) := longs_driv]
-        table_10d[i1,c(clusterss) := remtime/220+smalls_driv]
+    if((i1==1 | i1==3)){
+      if(unlist(table_9[i1,cluster,with=FALSE])!=0){
+        a<-findInterval(table_7[i1,cluster,with=FALSE],unlist(table_9[i1,cluster,with=FALSE])*sl_lu[1,]+220*sl_lu[2,])
+        longs_driv<-sl_lu[1,a]
+        smalls_driv<-sl_lu[2,a]
+        remtime<-table_7[i1,cluster,with=FALSE]-(unlist(table_9[i1,cluster,with=FALSE])*sl_lu[1,a]+220*sl_lu[2,a])
+        if(sl_lu[1,a]!=sl_lu[1,a+1]){
+          table_10d[i1,c(cluster) := unlist(remtime/unlist(table_9[i1,cluster,with=FALSE])+longs_driv)]
+          table_10d[i1,c(clusterss):=smalls_driv]
+        }else{
+          table_10d[i1,c(cluster) := longs_driv]
+          table_10d[i1,c(clusterss) := remtime/220+smalls_driv]
+        }
       }
-    }
+    }else{
+      if(unlist(table_9[i1,cluster,with=FALSE])!=0){
+        a<-findInterval(table_7[i1,cluster,with=FALSE],unlist(table_9[i1,cluster,with=FALSE])*sl_lu[1,]+160*sl_lu[2,])
+        longs_driv<-sl_lu[1,a]
+        smalls_driv<-sl_lu[2,a]
+        remtime<-table_7[i1,cluster,with=FALSE]-(unlist(table_9[i1,cluster,with=FALSE])*sl_lu[1,a]+160*sl_lu[2,a])
+        if(sl_lu[1,a]!=sl_lu[1,a+1]){
+          table_10d[i1,c(cluster) := unlist(remtime/unlist(table_9[i1,cluster,with=FALSE])+longs_driv)]
+          table_10d[i1,c(clusterss):=smalls_driv]
+        }else{
+          table_10d[i1,c(cluster) := longs_driv]
+          table_10d[i1,c(clusterss) := remtime/160+smalls_driv]
+        }
+      }
+    }  
   }
   return(table_10d)
 }
