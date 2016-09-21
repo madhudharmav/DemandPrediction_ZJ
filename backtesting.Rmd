@@ -23,18 +23,13 @@ source("smalls/utilrate_format_driv_berlin_smalls.R")
 source("smalls/utilrate_format_driv_london_smalls.R")
 source("smalls/utilrate_format_driv_paris_smalls.R")
 
-# wh_day<-as.Date("2016-08-31")
-# orders_alldays<-data.table()
-# drivers_alldays<-data.table()
-# real_asdvalues_alldays<-data.table()
-# pred_orders_alldays<-data.table()
-# asd_drivers_alldays<-data.table()
-# asd_values_alldays<-data.table()
+# wh_day<-as.Date("2016-09-19")
+
 load("data_output/backtesting.dat")
 
 #N<-as.numeric(Sys.Date()-as.Date("2016-09-02"))
 N<-as.numeric(Sys.Date()-wh_day-2)
-if(N==0){
+if(N<=0){
   print("backtesting data up to date")
   }else{
 for(i1 in c(1:N)){
@@ -51,31 +46,16 @@ load(paste("/home/madhu/workspace/Demandprediction/workingversion/data_output/df
 
 
 
-if(wh_day>as.Date("2016-09-13")){
-  
-pred_orders_alldays<-rbind(pred_orders_alldays,format_predorders(df_prediction_all,test_dates)[1:2])
+
+predorders<-format_predorders(df_prediction_all,test_dates)[1:2]  
+names(predorders)[names(predorders)=="EBERTY-ZENTRAL"]<-"Zentrallager"
+pred_orders_alldays<-rbind(pred_orders_alldays,predorders,use.names=TRUE)
 
 asd_drivers<-inner_join(format_drivers_asd_utilrate_lon(df_prediction_all,test_dates,df_test,clust_names),format_drivers_asd_utilrate_ber(df_prediction_all,test_dates,df_test,clust_names),by="Date")
 asd_drivers<-inner_join(asd_drivers,format_drivers_asd_utilrate_par(df_prediction_all,test_dates,df_test,clust_names),by="Date")
 
 asd_values<-format_asd_values(df_prediction_all,test_dates,df_test,clust_names)
 
-
-}else{ 
-  
-if(wh_day<as.Date("2016-09-08")){
-df_prediction_all$Central<-NA
-df_test$Central<-NA
-}
-
-pred_orders_alldays<-rbind(pred_orders_alldays,format_realorders(df_prediction_all,test_dates)[1:2])
-
-asd_drivers<-inner_join(format_drivers_asd_utilrate_lon_bt(df_prediction_all,test_dates,df_test,clust_names),format_drivers_asd_utilrate_ber_bt(df_prediction_all,test_dates,df_test,clust_names),by="Date")
-asd_drivers<-inner_join(asd_drivers,format_drivers_asd_utilrate_par_bt(df_prediction_all,test_dates,df_test,clust_names),by="Date")
-
-asd_values<-format_asd_values_bt(df_prediction_all,test_dates,df_test,clust_names)
-
-}
 
 asd_drivers_alldays<-rbind(asd_drivers_alldays,asd_drivers[1:2,], use.names=TRUE,fill=TRUE)
 asd_values_alldays<-rbind(asd_values_alldays,asd_values[1:2,], use.names=TRUE,fill=TRUE)
