@@ -38,8 +38,6 @@ set.seed(1)
 
 # load functions
 source("Demand_format.R")
-#source("Demand_models_hourly.R")
-#source("Demand_conv2drivers.R")
 source("make_idletimepivot.R")
 source("predictions_cluster_V3p2_diff_noit.R")
 source("getcreateddatebyref.R")
@@ -129,8 +127,6 @@ df_test <- one2two_hour_bins(df_test)
 # available: "stl", "HoltWinters", "ets", "stlm", "Arima",  "Arimax", "tbats"
 
 clusters_all<-c("Victoria" , "Camden" ,"City" , "North East" , "Soho" ,"South" ,"Southeast" , "West",  "West (new)",  "Zentrallager","Central" )  
-#df_drivers_all<-NULL
-#df_prediction_all<-NULL
 df_prediction_all<-data.frame(row.names=1:14)
 
 for (district in clusters_all){
