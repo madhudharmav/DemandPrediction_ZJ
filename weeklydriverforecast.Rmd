@@ -1,0 +1,77 @@
+---
+title: "Weekly Drivers"
+author: "Madhu"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+--- 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE,message=FALSE, include=FALSE}
+##### run every wednesday
+library(dplyr)
+library(data.table)
+library(DT)
+library(PerformanceAnalytics)
+clust_names<-c( "Camden" ,"City" ,"North East" , "Soho" ,"South" ,   "Southeast" ,"Victoria" , "West (new)", "West", "Zentrallager","Central" )
+source("tasks_driv_1day.R")
+source("smalls/format_orders_final.R")
+source("smalls/format_orders_final_bt.R")
+source("smalls/utilrate_format_driv_berlin_smalls.R")
+source("smalls/utilrate_format_driv_london_smalls.R")
+source("smalls/utilrate_format_driv_paris_smalls.R")
+
+# wh_day<-as.Date("2016-08-31")
+# orders_alldays<-data.table()
+# drivers_alldays<-data.table()
+# real_asdvalues_alldays<-data.table()
+# pred_orders_alldays<-data.table()
+# asd_drivers_alldays<-data.table()
+# asd_values_alldays<-data.table()
+load("data_output/backtesting.dat")
+today<-Sys.Date()
+lastweek_dates_noS<-paste0(rep(seq(today-9,today-3,1),each=2))
+lastweek_dates<-data.frame(Date=gsub("-","/",paste0(rep(seq(today-9,today-3,1),each=2),rep(c("-MS","-ES"),7))))
+lastweek_weekdays<-paste0(weekdays(rep(seq(today-9,today-3,1),each=2)))
+asd_values_alldays<-inner_join(lastweek_dates,asd_values_alldays)
+asd_values_alldays$City<-asd_values_alldays$City+asd_values_alldays$City_smallshifts
+asd_values_alldays$Soho<-asd_values_alldays$Soho+asd_values_alldays$Soho_smallshifts
+asd_values_alldays$Victoria<-asd_values_alldays$Victoria+asd_values_alldays$Victoria_smallshifts
+asd_values_alldays$Zentrallager<-asd_values_alldays$Zentrallager+asd_values_alldays$Zentrallager_smallshifts
+colstodel<-c("City_smallshifts","Soho_smallshifts","Victoria_smallshifts","Zentrallager_smallshifts")
+asd_values_alldays<-data.table(asd_values_alldays)
+asd_values_alldays[, (colstodel):=NULL]
+real_asdvalues_alldays<-inner_join(lastweek_dates,real_asdvalues_alldays)
+real_asdvalues_alldays<-data.table(real_asdvalues_alldays[,names(asd_values_alldays)])
+col_table<-setdiff(names(real_asdvalues_alldays), "Date")
+
+drivers_rounded<-data.frame(round(pmin(data.matrix(real_asdvalues_alldays[,c(2:ncol(real_asdvalues_alldays)),with=FALSE]),data.matrix(asd_values_alldays[,c(2:ncol(asd_values_alldays)),with=FALSE]))))
+drivers_rounded[drivers_rounded<1]<-1
+drivers_rounded$North.East[drivers_rounded$North.East<2]<-2
+drivers_rounded$West..new.[drivers_rounded$West..new.<2]<-2
+drivers_rounded$South[drivers_rounded$South<2]<-2
+drivers_rounded<-data.frame(Weekday=lastweek_weekdays,drivers_rounded)
+col_table<-setdiff(names(drivers_rounded), "Weekday")
+drivers_rounded<-inner_join(drivers_rounded[seq(1,14,2),],drivers_rounded[seq(2,14,2),],by="Weekday",suffix=c(".Morning",".Evening"))
+drivers_rounded <- drivers_rounded[, c(1,matrix(2:ncol(drivers_rounded), nrow = 2, byrow = T))]
+#print(sketch)
+```
+
+
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+sketch = htmltools::withTags(table(
+  class = 'display',
+  thead(
+    tr(
+      th(rowspan = 2, 'Weekday'),
+      lapply(col_table,th,colspan=2)
+    ),
+    tr(
+      lapply(rep(c('Morning', 'Evening'), length(col_table)), th)
+    )
+  )
+))
+datatable(drivers_rounded,container=sketch,options=list("paging"= F,"searching"=F,"autoWidth"= F), rownames = FALSE)
+```
