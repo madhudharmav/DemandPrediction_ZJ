@@ -62,6 +62,11 @@ driver_nos_MS[, (cols) := lapply(.SD, as.numeric), .SDcols=cols]
 #Evening shift
 driver_nos_ES<-driver_nos_data[strptime(destination_from_hours,format="%H:%M")>= strptime("14:00",format="%H:%M"),uniqueN(courier__name),by=.(fleet__name,Days.in.forecast__startAt__date)]
 class(driver_nos_ES$V1)<-"numeric"
+if (nrow(driver_nos_ES)==0){
+  driver_nos_ES<-data.table(matrix(NA,nrow=1,ncol=length(clust_names)+1))
+  names(driver_nos_ES)<-c("Date",clust_names)
+  driver_nos_ES$Date<-paste(wh_day,"ES",sep="/")
+}else{
 driver_nos_ES<-data.table(t(dcast(driver_nos_ES, fleet__name ~ Days.in.forecast__startAt__date, value.var = "V1")),keep.rownames = TRUE)
 names(driver_nos_ES)<-c("Date",unlist(driver_nos_ES[1,])[-1])
 driver_nos_ES<-driver_nos_ES[-1,]
@@ -69,6 +74,7 @@ driver_nos_ES$Date<-paste(driver_nos_ES$Date,"ES",sep="/")
 cols<-setdiff(names(driver_nos_ES),"Date")
 driver_nos_ES<-data.table(driver_nos_ES)
 driver_nos_ES[, (cols) := lapply(.SD, as.numeric), .SDcols=cols]
+}
 #both shifts
 driver_nos<-data.table(matrix(NA,nrow=0,ncol=length(clust_names)+1))
 names(driver_nos)<-c("Date",clust_names)
