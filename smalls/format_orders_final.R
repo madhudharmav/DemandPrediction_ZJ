@@ -11,11 +11,18 @@ format_realorders<-function(df_prediction_all,test_dates){
   df_prediction_2daysahead<-df_prediction_2daysahead[Date==test_dates[2] | Date==test_dates[3] | Date==test_dates[4]]
   pred_M_shft<-df_prediction_2daysahead[as.POSIXct(paste(Date,From,sep= " "),format="%Y-%m-%d %H:%M") <as.POSIXct(paste(Date,"14:00",sep= " "),format="%Y-%m-%d %H:%M"),lapply(.SD,sum), by=Date,.SDcols=c( "Camden" ,"City" ,"North East" , "Soho" ,"South" , "Southeast" ,"Victoria" ,"West (new)",  "West",   "Zentrallager" ,"Central") ]
   pred_E_shft<-df_prediction_2daysahead[as.POSIXct(paste(Date,From,sep= " "),format="%Y-%m-%d %H:%M") >=as.POSIXct(paste(Date,"14:00",sep= " "),format="%Y-%m-%d %H:%M"), lapply(.SD,sum),by=Date,.SDcols=c( "Camden" ,"City" , "North East" , "Soho" ,"South" ,"Southeast" ,"Victoria" ,"West (new)", "West",    "Zentrallager","Central"  ) ]
+  e_ms<-pred_M_shft[weekdays(pred_M_shft$Date)=="Saturday",Zentrallager]
+  e_es<-pred_E_shft[weekdays(pred_E_shft$Date)=="Saturday",Zentrallager]
+  pred_M_shft[weekdays(Date)=="Saturday",Zentrallager:=rowSums(data.frame(e_ms,e_es),na.rm = TRUE)]
+  pred_E_shft[weekdays(Date)=="Saturday",Zentrallager:=NA]
   table_1<-rbind(pred_M_shft,pred_E_shft,use.names=TRUE,fill=TRUE)
   table_1<-table_1[c(4,2,5,3),]
   shft_n<-c("ES","MS","ES","MS")
   table_1$Date<-paste(table_1[,Date],shft_n,sep="-")
   table_1$Date<-gsub("-","/",table_1$Date)
+  
+  
+
   return(table_1)
 }
 addsmallshift<-function(table_7,table_9,table_10d,cluster){
@@ -62,6 +69,7 @@ format_drivers_asd_utilrate_lon<-function(df_prediction_all,test_dates,df_test,c
   library(data.table)
  
   table_1<-format_predorders(df_prediction_all,test_dates)
+  table_1[table_1<0]<-0
   table_2<-format_realorders(df_test,test_dates)
   table_1<-table_1[,.SD,.SDcols=intersect(names(table_2),names(table_1))]
   table_2d<-table_2[,c(2:ncol(table_2)),with=F]
@@ -105,6 +113,7 @@ format_drivers_asd_utilrate_ber<-function(df_prediction_all,test_dates,df_test,c
   library(data.table)
  
   table_1<-format_predorders(df_prediction_all,test_dates)
+  table_1[table_1<0]<-0
   table_2<-format_realorders(df_test,test_dates)
   table_1<-table_1[,.SD,.SDcols=intersect(names(table_2),names(table_1))]
   table_2d<-table_2[,c(2:ncol(table_2)),with=F]
@@ -149,6 +158,7 @@ format_drivers_asd_utilrate_par<-function(df_prediction_all,test_dates,df_test,c
   library(data.table)
   
   table_1<-format_predorders(df_prediction_all,test_dates)
+  table_1[table_1<0]<-0
   table_2<-format_realorders(df_test,test_dates)
   table_1<-table_1[,.SD,.SDcols=intersect(names(table_2),names(table_1))]
   table_2d<-table_2[,c(2:ncol(table_2)),with=F]
@@ -195,6 +205,7 @@ format_asd_values<-function(df_prediction_all,test_dates,df_test,clust_names){
   library(data.table)
   
   table_1<-format_predorders(df_prediction_all,test_dates)
+  table_1[table_1<0]<-0
   table_2<-format_realorders(df_test,test_dates)
   table_1<-table_1[,.SD,.SDcols=intersect(names(table_2),names(table_1))]
   table_2d<-table_2[,c(2:ncol(table_2)),with=F]
