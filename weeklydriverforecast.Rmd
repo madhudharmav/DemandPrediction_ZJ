@@ -31,7 +31,8 @@ source("smalls/utilrate_format_driv_paris_smalls.R")
 # asd_drivers_alldays<-data.table()
 # asd_values_alldays<-data.table()
 load("data_output/backtesting.dat")
-today<-Sys.Date()
+#today<-Sys.Date()
+today<-as.Date("2016-09-21")
 lastweek_dates_noS<-paste0(rep(seq(today-9,today-3,1),each=2))
 lastweek_dates<-data.frame(Date=gsub("-","/",paste0(rep(seq(today-9,today-3,1),each=2),rep(c("-MS","-ES"),7))))
 lastweek_weekdays<-paste0(weekdays(rep(seq(today-9,today-3,1),each=2)))
@@ -52,15 +53,50 @@ drivers_rounded[drivers_rounded<1]<-1
 drivers_rounded$North.East[drivers_rounded$North.East<2]<-2
 drivers_rounded$West..new.[drivers_rounded$West..new.<2]<-2
 drivers_rounded$South[drivers_rounded$South<2]<-2
-drivers_rounded<-data.frame(Weekday=lastweek_weekdays,drivers_rounded)
-col_table<-setdiff(names(drivers_rounded), "Weekday")
-drivers_rounded<-inner_join(drivers_rounded[seq(1,14,2),],drivers_rounded[seq(2,14,2),],by="Weekday",suffix=c(".Morning",".Evening"))
-drivers_rounded <- drivers_rounded[, c(1,matrix(2:ncol(drivers_rounded), nrow = 2, byrow = T))]
+names(drivers_rounded)<-col_table
+drivers_rounded<-data.table(cbind(Weekday=lastweek_weekdays,drivers_rounded))
+
 #print(sketch)
 ```
 
+###Drivers per city and cluster{.tabset}
 
+#### By city
 ```{r echo=FALSE,message=FALSE,warning=FALSE}
+
+b_clusters<-c("West","Zentrallager")
+p_clusters<-c("Central")
+l_clusters<-setdiff(names(drivers_rounded),c(b_clusters,p_clusters,"Weekday"))
+
+drivers_rounded_city<-data.frame("Weekday"=lastweek_weekdays,
+          "London"=rowSums(drivers_rounded[,l_clusters,with=FALSE],na.rm=TRUE),
+          "Berlin"=rowSums(drivers_rounded[,b_clusters,with=FALSE],na.rm=TRUE),
+          "Paris"=rowSums(drivers_rounded[,p_clusters,with=FALSE],na.rm=TRUE)
+)
+drivers_rounded_city<-inner_join(drivers_rounded_city[seq(1,14,2),],drivers_rounded_city[seq(2,14,2),],by="Weekday",suffix=c(".Morning",".Evening"))
+drivers_rounded_city <- drivers_rounded_city[, c(1,matrix(2:ncol(drivers_rounded_city), nrow = 2, byrow = T))]
+
+sketch = htmltools::withTags(table(
+  class = 'display',
+  thead(
+    tr(
+      th(rowspan = 2, 'Weekday'),
+      lapply(c("London","Berlin","Paris"),th,colspan=2)
+    ),
+    tr(
+      lapply(rep(c('Morning', 'Evening'), 3), th)
+    )
+  )
+))
+datatable(drivers_rounded_city,container=sketch,options=list("paging"= F,"searching"=F,"autoWidth"= F), rownames = FALSE)
+```
+
+#### By cluster
+```{r echo=FALSE,message=FALSE,warning=FALSE}
+
+col_table<-setdiff(names(drivers_rounded), "Weekday")
+drivers_rounded_cluster<-inner_join(drivers_rounded[seq(1,14,2),],drivers_rounded[seq(2,14,2),],by="Weekday",suffix=c(".Morning",".Evening"))
+drivers_rounded_cluster <- drivers_rounded_cluster[, c(1,matrix(2:ncol(drivers_rounded_cluster), nrow = 2, byrow = T))]
 sketch = htmltools::withTags(table(
   class = 'display',
   thead(
@@ -73,5 +109,6 @@ sketch = htmltools::withTags(table(
     )
   )
 ))
-datatable(drivers_rounded,container=sketch,options=list("paging"= F,"searching"=F,"autoWidth"= F), rownames = FALSE)
+datatable(drivers_rounded_cluster,container=sketch,options=list("paging"= F,"searching"=F,"autoWidth"= F), rownames = FALSE)
 ```
+
