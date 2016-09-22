@@ -32,6 +32,7 @@ source("smalls/utilrate_format_driv_london_smalls.R")
 source("smalls/utilrate_format_driv_paris_smalls.R")
   table_1<-format_predorders(df_prediction_all,test_dates)
   #table_1<-format_realorders(df_prediction_all,test_dates) #if date <2016-09-13
+  table_1[table_1<0]<-0
   table_2<-format_realorders(df_test,test_dates)
   table_1<-table_1[,.SD,.SDcols=intersect(names(table_2),names(table_1))]
   table_2d<-table_2[,c(2:ncol(table_2)),with=F]
