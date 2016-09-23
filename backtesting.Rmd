@@ -70,7 +70,7 @@ compare_orders <- compare_orders[, c(1,matrix(2:ncol(compare_orders), nrow = 2, 
 diff_pred<-abs(compare_orders[seq(2,ncol(compare_orders),by=2)]-compare_orders[seq(3,ncol(compare_orders),by=2)])
 diff_pred<-diff_pred/compare_orders[seq(2,ncol(compare_orders),by=2)]
 diff_pred<-data.frame(lapply(diff_pred,function(x){ifelse(is.infinite(x),0,x)}))
-names(diff_pred)<-clust_names[!(clust_names %in% "Central")]
+#names(diff_pred)<-clust_names[!(clust_names %in% "Central")]
 perc_medianerror_orders<-rbind(apply(diff_pred[seq(1,nrow(diff_pred),2),],2,median,na.rm=TRUE),apply(diff_pred[seq(2,nrow(diff_pred),2),],2,median,na.rm=TRUE))
 perc_medianerror_orders<-cbind( perc_medianerror_orders,all=rowMeans(perc_medianerror_orders))
 perc_meanerror_orders<-rbind(apply(diff_pred[seq(1,nrow(diff_pred),2),],2,mean,na.rm=TRUE),apply(diff_pred[seq(2,nrow(diff_pred),2),],2,mean,na.rm=TRUE))
