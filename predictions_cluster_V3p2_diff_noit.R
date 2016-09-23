@@ -9,17 +9,17 @@ predictions_cluster_V3p2_diff_noit<-function( district,testing_days,daily_intera
 daily_interactions_diff<-daily_interactions[, district,with=FALSE]-daily_interactions_48hrsahead[, district,with=FALSE]
 ts_training <- ts(data = daily_interactions_diff, end = 0, frequency = 7)
 
-
-
+lamd<-BoxCox.lambda(ts_training, method=c("guerrero"), lower=-1, upper=2)
+#print(lamd)
 p<-try(daily_model <- Arima(ts_training,
                             order = c(2,1,0),
-                            seasonal = list(order = c(2,1,0), period = 7)),silent = TRUE
+                            seasonal = list(order = c(2,1,0), period = 7),lambda = lamd),silent = TRUE
 )
 if(class(p)=="try-error"){
   print("init value problem")
   daily_model <- Arima(ts_training,
                        order = c(2,1,0),
-                       seasonal = list(order = c(2,1,0), period = 7),method="CSS")}
+                       seasonal = list(order = c(2,1,0), period = 7,lambda = lamd),method="CSS")}
 
 # forecast
 
