@@ -27,8 +27,9 @@ format_realorders<-function(df_prediction_all,test_dates){
 }
 addsmallshift<-function(table_7,table_9,table_10d,cluster){
   clusterss<-paste0(cluster,"_smallshifts")
-  sl_lu<-rbind(c(0,1,1,1,1,2,2,2,3,3,3),c(0,0,1,2,3,2,3,4,3,4,5))
+  sl_lu<-rbind(c(0,1,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6),c(0,0,1,2,3,2,3,4,3,4,5,4,5,6,5,6,7,6,7))
   for (i1 in c(1:4)){
+    print(i1)
     if(cluster=="Zentrallager" & (i1==1 | i1==3)){
       table_10d[i1,c(clusterss) := 0]
       next
