@@ -2,11 +2,11 @@
 
 setwd("/home/madhu/workspace/Demandprediction/workingversion")
 rmarkdown::render("DP_final_report_ops_Berlin.Rmd")
-file.copy("DP_final_report_ops_Berlin.html","/home/madhu/workspace/shinyserver/DemandPred_html/Berlin",overwrite=TRUE)
+file.rename("DP_final_report_ops_Berlin.html","/home/madhu/workspace/shinyserver/DemandPred_html/Berlin/DP_final_report_ops_Berlin.html")
 rmarkdown::render("DP_final_report_ops_London.Rmd")
-file.copy("DP_final_report_ops_London.html","/home/madhu/workspace/shinyserver/DemandPred_html/London",overwrite=TRUE)
+file.rename("DP_final_report_ops_London.html","/home/madhu/workspace/shinyserver/DemandPred_html/London/DP_final_report_ops_London.html")
 rmarkdown::render("DP_final_report_ops_Paris.Rmd")
-file.copy("DP_final_report_ops_Paris.html","/home/madhu/workspace/shinyserver/DemandPred_html/Paris",overwrite=TRUE)
+file.rename("DP_final_report_ops_Paris.html","/home/madhu/workspace/shinyserver/DemandPred_html/Paris/DP_final_report_ops_Paris.html")
 
 
  rmarkdown::render("Detailanalysisreport.Rmd")
