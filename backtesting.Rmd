@@ -23,21 +23,20 @@ source("smalls/utilrate_format_driv_berlin_smalls.R")
 source("smalls/utilrate_format_driv_london_smalls.R")
 source("smalls/utilrate_format_driv_paris_smalls.R")
 
-# wh_day<-as.Date("2016-09-19")
+
 
 load("data_output/backtesting.dat")
 
-#N<-as.numeric(Sys.Date()-as.Date("2016-09-02"))
 N<-as.numeric(Sys.Date()-wh_day-2)
+
 if(N<=0){
   print("backtesting data up to date")
   }else{
 for(i1 in c(1:N)){
-wh_day<-wh_day+1
 
+wh_day<-wh_day+1
 print(wh_day)
 a<-tasks_driv_1day(wh_day+2)
-
 orders_alldays<-rbind(orders_alldays,a[[1]], use.names=TRUE)
 drivers_alldays<-rbind(drivers_alldays,a[[2]], use.names=TRUE,fill=TRUE)
 real_asdvalues_alldays<-rbind(real_asdvalues_alldays,a[[3]], use.names=TRUE,fill=TRUE)
@@ -64,13 +63,12 @@ asd_values_alldays<-rbind(asd_values_alldays,asd_values[1:2,], use.names=TRUE,fi
 }
 
 save(orders_alldays,drivers_alldays,real_asdvalues_alldays,pred_orders_alldays,asd_drivers_alldays,asd_values_alldays,wh_day,file="data_output/backtesting.dat")
-
+pred_orders_alldays<-pred_orders_alldays[,names(orders_alldays),with=FALSE]
 compare_orders<-inner_join(orders_alldays,pred_orders_alldays,by="Date",suffix = c(".real", ".pred"))
 compare_orders <- compare_orders[, c(1,matrix(2:ncol(compare_orders), nrow = 2, byrow = T))]
 diff_pred<-abs(compare_orders[seq(2,ncol(compare_orders),by=2)]-compare_orders[seq(3,ncol(compare_orders),by=2)])
 diff_pred<-diff_pred/compare_orders[seq(2,ncol(compare_orders),by=2)]
 diff_pred<-data.frame(lapply(diff_pred,function(x){ifelse(is.infinite(x),0,x)}))
-#names(diff_pred)<-clust_names[!(clust_names %in% "Central")]
 perc_medianerror_orders<-rbind(apply(diff_pred[seq(1,nrow(diff_pred),2),],2,median,na.rm=TRUE),apply(diff_pred[seq(2,nrow(diff_pred),2),],2,median,na.rm=TRUE))
 perc_medianerror_orders<-cbind( perc_medianerror_orders,all=rowMeans(perc_medianerror_orders))
 perc_meanerror_orders<-rbind(apply(diff_pred[seq(1,nrow(diff_pred),2),],2,mean,na.rm=TRUE),apply(diff_pred[seq(2,nrow(diff_pred),2),],2,mean,na.rm=TRUE))
